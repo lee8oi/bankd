@@ -18,7 +18,7 @@ namespace eval bankd {
 #
 #   Bankd script v0.4.4 (9-27-11)
 #   by: <lee8oi@github><lee8oiOnfreenode>
-#   github link: https://github.com/lee8oi/eggdrop/blob/master/bankd.tcl
+#   github link: https://github.com/lee8oi/bankd/blob/master/bankd.tcl
 #
 #   The second graduate of the Dukescript Volatile Experiment. Bankd script is
 #   one of those 'wouldn't it be kinda cool if' ideas I came up with mainly
