@@ -143,8 +143,8 @@ namespace eval bankd {
             set interest [expr {int($value * [set ::bankd::intrate])}]
             set ::bankd::bankdb($name) [expr $value + $interest]
             # putlog "gave $name $interest in interest."
-            ::bankd::backupdb
         }
+        ::bankd::backupdb
         timer [set ::bankd::intinterval] [list ::bankd::interest_timer]
         return 1
     }
