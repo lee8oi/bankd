@@ -16,15 +16,15 @@ namespace eval bankd {
 #
 ################################################################################
 #
-#   Bankd script v0.4.4 (9-27-11)
+#   Bankd script v0.4.5 (9-29-11)
 #   by: <lee8oi@github><lee8oiOnfreenode>
 #   github link: https://github.com/lee8oi/bankd/blob/master/bankd.tcl
 #
-#   The second graduate of the Dukescript Volatile Experiment. Bankd script is
-#   one of those 'wouldn't it be kinda cool if' ideas I came up with mainly
-#   to entertain myself. The idea was to come up with a banking system that
-#   could be used for role playing purposes in selected channels allowing users
-#   to transfer funds to other users and collect interest.
+#   Bankd script is one of those 'wouldn't it be kinda cool if' ideas I came 
+#   up with mainly to entertain myself. The idea was to come up with a
+#   banking system that could be used for role playing purposes in selected
+#   channels allowing users to transfer funds to other users and collect
+#   interest.
 #
 #   The public command allows users to check thier balance or transfer
 #   funds to another user (provided both have accounts). Bot owners 
@@ -42,6 +42,8 @@ namespace eval bankd {
 #    help to show command syntax using current trigger instead of default
 #    trigger.
 #    4.Added configurable public command trigger.
+#    5.Switched pub_handler proc to use proper command bind instead of
+#    checking all channel msgs for command trigger.
 #
 #   ------------------------------------------------------------------------
 #
@@ -108,12 +110,13 @@ namespace eval bankd {
 #   Experts only below.
 ################################################################################
 }
-bind pubm - * ::bankd::pub_handler
+bind pub - [set ::bankd::trigger] ::bankd::pub_handler
+#bind pubm - * ::bankd::pub_handler
 bind dcc n bankd ::bankd::dcc_admin
 setudef flag bankd
 namespace eval bankd {
     variable bankdb
-    variable ver "0.4.4"
+    variable ver "0.4.5"
     if {[file exist [set ::bankd::backupfile]]} {
         source [set ::bankd::backupfile]
     }
@@ -182,10 +185,7 @@ namespace eval bankd {
             set textarr [split $text]
             set first [string tolower [lindex $textarr 0]]
             set nick [string tolower $nick]
-            set cmdtrigger [string tolower [set ::bankd::trigger]]
-            if {$first == $cmdtrigger} {
-               set second [string tolower [lindex $textarr 1]]
-               switch $second {
+               switch $first {
                    "" {
                        putserv "PRIVMSG $channel :usage: [set ::bankd::trigger] ?balance|transfer? ?args?"
                    }
@@ -225,7 +225,7 @@ namespace eval bankd {
                        }
                     }
                 }
-            }
+            
         }
     }
     proc dcc_admin {handle idx text} {
