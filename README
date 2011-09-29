@@ -1,5 +1,45 @@
-#   The second graduate of the Dukescript Volatile Experiment. Bankd script is
-#   one of those 'wouldn't it be kinda cool if' ideas I came up with mainly
-#   to entertain myself. The idea was to come up with a banking system that
-#   could be used for role playing purposes in selected channels allowing users
-#   to transfer funds to other users and collect interest.
+#   Bankd script v0.4.6 (9-29-11)
+#   by: <lee8oi@github><lee8oiOnfreenode>
+#   github link: https://github.com/lee8oi/bankd/blob/master/bankd.tcl
+#
+#   Bankd script is one of those 'wouldn't it be kinda cool if' ideas I came 
+#   up with mainly to entertain myself. The idea was to come up with a
+#   banking system that could be used for role playing purposes in selected
+#   channels allowing users to transfer funds to other users and collect
+#   interest.
+#
+#   The public command allows users to check thier balance or transfer
+#   funds to another user (provided both have accounts). Bot owners 
+#   have access to the dcc/partyline command '.bankd' which allows them to add,
+#   remove, list, check, and edit the 'bank accounts'. An automatic timer 
+#   periodically adds an 'interest' to all existing bank accounts.
+#
+#
+#   Initial channel setup:
+#   (enables use of public info command in specified channel)
+#    .chanset #channel +bankd
+#
+#   Public command syntax:
+#    .bank ?balance|transfer? ?args?
+#
+#   DCC (partyline) command syntax:
+#    .bankd ?add|remove|check|list|edit? ?args?
+#
+#   Example Usage:
+#    (public)
+#       <lee8oi> !bank balance
+#   <dukelovett> lee8oi, your balance is: 1000
+#       <lee8oi> !bank transfer 100 dukelovett
+#   <dukelovett> transfer successful.
+#       <lee8oi> !bank
+#   <dukelovett> usage: .bank ?balance|transfer? ?args?
+#
+#    (DCC/Partyline)
+#       <lee8oi> .bankd add jimmy
+#   <dukelovett> account created.
+#       <lee8oi> .bankd remove jimmy
+#   <dukelovett> account removed.
+#       <lee8oi> .bankd
+#   <dukelovett> usage: .bankd ?add|remove|check|list|edit? ?args?
+#       <lee8oi> .bankd add
+#   <dukelovett> usage: .bankd add <name>

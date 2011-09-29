@@ -32,22 +32,6 @@ namespace eval bankd {
 #   remove, list, check, and edit the 'bank accounts'. An automatic timer 
 #   periodically adds an 'interest' to all existing bank accounts.
 #
-#   ------------------------------------------------------------------------
-#
-#   Updates for v0.4:
-#    1.Added configurable backupfile location/name.
-#    2.Fixed nick case issue. User can now access account even if they
-#    change the case of their nick.
-#    3.Added public command trigger configuration. Fixed public command 
-#    help to show command syntax using current trigger instead of default
-#    trigger.
-#    4.Added configurable public command trigger.
-#    5.Switched pub_handler proc to use proper command bind instead of
-#    checking all channel msgs for command trigger.
-#    6.Minor code cleanup/commenting. Added 'log interest payouts' config
-#    for enabling/disabling logging the interest payments paid on intervals.
-#
-#   ------------------------------------------------------------------------
 #
 #   Initial channel setup:
 #   (enables use of public info command in specified channel)
@@ -78,6 +62,22 @@ namespace eval bankd {
 #       <lee8oi> .bankd add
 #   <dukelovett> usage: .bankd add <name>
 #
+#   ------------------------------------------------------------------------
+#
+#   Updates for v0.4:
+#    1.Added configurable backupfile location/name.
+#    2.Fixed nick case issue. User can now access account even if they
+#    change the case of their nick.
+#    3.Added public command trigger configuration. Fixed public command 
+#    help to show command syntax using current trigger instead of default
+#    trigger.
+#    4.Added configurable public command trigger.
+#    5.Switched pub_handler proc to use proper command bind instead of
+#    checking all channel msgs for command trigger.
+#    6.Minor code cleanup/commenting. Added 'log interest payouts' config
+#    for enabling/disabling logging the interest payments paid on intervals.
+#
+#   ------------------------------------------------------------------------
 ################################################################################
 #
 #   CONFIGURATION
