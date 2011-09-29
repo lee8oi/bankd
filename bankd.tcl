@@ -16,7 +16,7 @@ namespace eval bankd {
 #
 ################################################################################
 #
-#   Bankd script v0.4.5 (9-29-11)
+#   Bankd script v0.4.6 (9-29-11)
 #   by: <lee8oi@github><lee8oiOnfreenode>
 #   github link: https://github.com/lee8oi/bankd/blob/master/bankd.tcl
 #
@@ -44,6 +44,8 @@ namespace eval bankd {
 #    4.Added configurable public command trigger.
 #    5.Switched pub_handler proc to use proper command bind instead of
 #    checking all channel msgs for command trigger.
+#    6.Minor code cleanup/commenting. Added 'log interest payouts' config
+#    for enabling/disabling logging the interest payments paid on intervals.
 #
 #   ------------------------------------------------------------------------
 #
@@ -99,6 +101,13 @@ namespace eval bankd {
     variable intinterval    10
 #                          +--+
 #
+#   LOG INTEREST PAYOUTS
+#    Uses putlog to log interest amounts paid each interval.
+#    1=on 0=off
+#                         +-+
+    variable loginterest   0
+#                         +-+
+#
 #   BACKUP LOCATION/FILE
 #    Relative pathname starting from eggdrop dir. The location/filename of
 #    the backup file used to save bank information.
@@ -111,18 +120,16 @@ namespace eval bankd {
 ################################################################################
 }
 bind pub - [set ::bankd::trigger] ::bankd::pub_handler
-#bind pubm - * ::bankd::pub_handler
 bind dcc n bankd ::bankd::dcc_admin
 setudef flag bankd
 namespace eval bankd {
     variable bankdb
-    variable ver "0.4.5"
+    variable ver "0.4.6"
     if {[file exist [set ::bankd::backupfile]]} {
         source [set ::bankd::backupfile]
     }
     if {![info exists ::bankd::timer_running]} {
-       # no existing timer. start new one.
-       #putlog "no timer running. Starting one. ~dukescript~"
+       # start new timer.
        timer [set ::bankd::intinterval] [list ::bankd::interest_timer]
        set ::bankd::timer_running 1
     }
@@ -135,6 +142,7 @@ namespace eval bankd {
     proc withdraw {amount debtor} {
         # withraw bank funds.
         if {$amount <= [set ::bankd::bankdb($debtor)]} {
+            # amount is less than account balance.
             set ::bankd::bankdb($debtor) [expr [set ::bankd::bankdb($debtor)] - $amount]
             ::bankd::backupdb
             return 1
@@ -145,7 +153,10 @@ namespace eval bankd {
         foreach {name value} [array get ::bankd::bankdb] {
             set interest [expr {int($value * [set ::bankd::intrate])}]
             set ::bankd::bankdb($name) [expr $value + $interest]
-            # putlog "gave $name $interest in interest."
+            if {[set ::bankd::loginterest]} {
+                # log interest payment.
+                putlog "Paid $name $interest in interest."
+            }
         }
         ::bankd::backupdb
         timer [set ::bankd::intinterval] [list ::bankd::interest_timer]
@@ -185,47 +196,47 @@ namespace eval bankd {
             set textarr [split $text]
             set first [string tolower [lindex $textarr 0]]
             set nick [string tolower $nick]
-               switch $first {
-                   "" {
-                       putserv "PRIVMSG $channel :usage: [set ::bankd::trigger] ?balance|transfer? ?args?"
-                   }
-                   "balance" {
-                       if {[info exists ::bankd::bankdb($nick)]} {
-                           putserv "PRIVMSG $channel :$nick, your balance is:\
-                           [set ::bankd::bankdb($nick)]"
-                       } else {
-                           putserv "PRIVMSG $channel :$nick, you do not have an account."
-                       }
-                   }
-                   "transfer" {
-                       set payee [lindex $textarr 3]
-                       set amount [lindex $textarr 2]
-                       if {$amount == ""} {
-                           putserv "PRIVMSG $channel :usage: .bank transfer <amount> <payee>"
-                       } elseif {[info exists ::bankd::bankdb($nick)]} {
-                           if {[info exists ::bankd::bankdb($payee)]} {
-                               if {[string is integer $amount]} {
-                                   if {[::bankd::withdraw $amount $nick] == 1} {
-                                       if {[::bankd::deposit $amount $payee] == 1} {
-                                           putserv "PRIVMSG $channel :transfer successful"
-                                       } else {
-                                           putserv "PRIVMSG $channel :cannot deposit funds."
-                                       }
-                                   } else {
-                                       putserv "PRIVMSG $channel :insufficient funds."
-                                   }
-                               } else {
-                                   putserv "PRIVMSG $channel :cannot use '$amount' as an amount."
-                               }
-                           } else {
-                               putserv "PRIVMSG $channel :$payee does not have an account."
-                           }
-                       } else {
-                           putserv "PRIVMSG $channel :$nick, you do not have an account."
-                       }
+            switch $first {
+                "" {
+                    putserv "PRIVMSG $channel :usage: [set ::bankd::trigger] ?balance|transfer? ?args?"
+                }
+                "balance" {
+                    if {[info exists ::bankd::bankdb($nick)]} {
+                        putserv "PRIVMSG $channel :$nick, your balance is:\
+                        [set ::bankd::bankdb($nick)]"
+                    } else {
+                        putserv "PRIVMSG $channel :$nick, you do not have an account."
                     }
                 }
-            
+                "transfer" {
+                    set payee [lindex $textarr 3]
+                    set amount [lindex $textarr 2]
+                    if {$amount == ""} {
+                        putserv "PRIVMSG $channel :usage: .bank transfer <amount> <payee>"
+                    } elseif {[info exists ::bankd::bankdb($nick)]} {
+                         
+                        if {[info exists ::bankd::bankdb($payee)]} {
+                            if {[string is integer $amount]} {
+                                if {[::bankd::withdraw $amount $nick] == 1} {
+                                    if {[::bankd::deposit $amount $payee] == 1} {
+                                        putserv "PRIVMSG $channel :transfer successful"
+                                    } else {
+                                        putserv "PRIVMSG $channel :cannot deposit funds."
+                                    }
+                                } else {
+                                    putserv "PRIVMSG $channel :insufficient funds."
+                                }
+                            } else {
+                                putserv "PRIVMSG $channel :cannot use '$amount' as an amount."
+                            }
+                        } else {
+                            putserv "PRIVMSG $channel :$payee does not have an account."
+                        }
+                    } else {
+                        putserv "PRIVMSG $channel :$nick, you do not have an account."
+                    }
+                }
+            }
         }
     }
     proc dcc_admin {handle idx text} {
