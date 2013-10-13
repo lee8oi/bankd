@@ -209,9 +209,9 @@ namespace eval bankd {
                     }
                 }
                 "transfer" {
-                    set payee [lindex $textarr 3]
-                    set amount [lindex $textarr 2]
-                    if {$amount == ""} {
+                    set payee [string tolower [lindex $textarr 2]]
+                    set amount [lindex $textarr 1]
+                    if {$amount <= 0} {
                         putserv "PRIVMSG $channel :usage: .bank transfer <amount> <payee>"
                     } elseif {[info exists ::bankd::bankdb($nick)]} {
                          
